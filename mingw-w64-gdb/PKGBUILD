@@ -6,7 +6,7 @@ pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}"
          "${MINGW_PACKAGE_PREFIX}-${_realname}-multiarch")
 pkgver=14.2
-pkgrel=1
+pkgrel=2
 pkgdesc="GNU Debugger (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
@@ -34,15 +34,17 @@ source=(https://ftp.gnu.org/gnu/${_realname}/${_realname}-${pkgver}.tar.xz{,.sig
         '0002-Fix-using-gnu-print.patch'
         '0003-configure-Disable-static-linking-with-standard-libs.patch'
         '0004-Python-Configure-path-fixes.patch'
-        '0005-W32-Always-check-USERPROFILE-if-HOME-is-not-set.patch')
+        '0005-W32-Always-check-USERPROFILE-if-HOME-is-not-set.patch'
+        '0006-sim-erc32-Rename-EVENT_MAX-MAX_EVENTS.patch')
 validpgpkeys=('F40ADB902B24264AA42E50BF92EDB04BFF325CF3')
 sha256sums=('2d4dd8061d8ded12b6c63f55e45344881e8226105f4d2a9b234040efa5ce7772'
             'SKIP'
-            '428cda7dcc107c236225ae89704390b0f1e70c276b5ca6b1741988f384b21d62'
-            'cf12bce0b988765ecac26a6895238c48ef9676d6fc01f986f75dcbc8bd8d3f07'
-            '0eb291cd81f7392610d16a83f436a30d3384a99661c6b6ffd1bfb243d5aee6dd'
-            '7ef9c6e238a4e232bc689e15e48ee2d8045542c47f0b156d9fc92a7c14e6757e'
-            '39d1cb2a1be8d60c16404ad96882f10cd3ebd942d8b7af62a7416a230a50de93')
+            '94c1987772f0f26ada24d5ea3711314e30e48add8ff7e69ae09b247a0d7ad507'
+            '92a126d3880793cbd93be66110b1e559f3a629d97ad3c81d711000c62e7adefe'
+            'ed6ed8701db5db3ce7533e6e2b04d559ab1a5e817ca83d7f954256cfb78487a8'
+            '4d8547e6652d7bf8f89087faf30ee869c4f0a5dd60665be7f26f1fc42fdf6667'
+            '5cceb1694712263bb4e6bd6742e7cf001bf3f941a1ae47d95520c9a1ed2a80a5'
+            'c05c8525920b69e36a68d451956bea77084f2b4e0d8fd735d2ed9b934b3bf299')
 
 apply_patch_with_msg() {
   for _patch in "$@"
@@ -69,6 +71,10 @@ prepare() {
   apply_patch_with_msg \
     0004-Python-Configure-path-fixes.patch \
     0005-W32-Always-check-USERPROFILE-if-HOME-is-not-set.patch
+
+  # https://sourceware.org/bugzilla/show_bug.cgi?id=28476
+  apply_patch_with_msg \
+    0006-sim-erc32-Rename-EVENT_MAX-MAX_EVENTS.patch
 
   # hack! - libiberty configure tests for header files using "$CPP $CPPFLAGS"
   sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" libiberty/configure
@@ -101,7 +107,6 @@ do_build() {
     --disable-werror \
     --disable-win32-registry \
     --disable-rpath \
-    --disable-sim \
     --with-curses \
     --with-system-gdbinit=${MINGW_PREFIX}/etc/gdbinit \
     --with-system-readline \
