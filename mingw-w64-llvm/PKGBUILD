@@ -11,8 +11,6 @@ if [[ $MINGW_PACKAGE_PREFIX == *-clang-* ]]; then
   _clangprefix=1
   _compiler=clang
   _pgo=1
-else
-  _compiler=clang
 fi
 
 _realname=llvm
@@ -32,7 +30,7 @@ pkgver=${_pkgver/-/}
 pkgrel=4
 pkgdesc="C language family frontend for LLVM (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 url="https://llvm.org/"
 msys2_repository_url="https://github.com/llvm/llvm-project"
 msys2_references=(
@@ -61,6 +59,7 @@ source=("${_url}/${_pkgfn}.tar.xz"{,.sig}
         "0001-Fix-GetHostTriple-for-mingw-w64-in-msys.patch"
         "0002-Fix-Findzstd-on-MINGW.patch"
         "0003-add-pthread-as-system-lib-for-mingw.patch"
+        "0004-disable-export-all-symbols-on-mingw32.patch"
         # 0101-0199 -> clang
         "0101-link-pthread-with-mingw.patch"
         # 0201-0299 -> rt
@@ -74,6 +73,7 @@ sha256sums=('3e68c90dda630c27d41d201e37b8bbf5222e39b273dec5ca880709c69e0a07d4'
             'eb03df53671df6627768141b3aaa76abe176a14e5e47911c97bec544387c4aff'
             'd77d47e37e4948f5c01ae8bc05fb4e879b6516132c5a60c7bc820c9cbbb39668'
             '790eb0fccb4ef29c3795bceb8a62c8f4ecd0bdd6c49b2812352b04cfbc552342'
+            '9d50667b4bc88b86781c8d4c90e6faf71e0ee9bf943415a0dffee69c9344286f'
             '715cb8862753854b2d9256e0b70003e2d1f57083d83eaeaf5a095fc72b8a4e26'
             'fd0253879cc5e31857f57307e6105e56493358e35d7c4540e0b476be607ab94e')
 validpgpkeys=('B6C8F98282B944E3B0D5C2530FC3042E345AD05D'  # Hans Wennborg, Google.
@@ -107,7 +107,8 @@ prepare() {
   cd "${srcdir}"/${_pkgfn}/llvm
   apply_patch_with_msg \
     "0001-Fix-GetHostTriple-for-mingw-w64-in-msys.patch" \
-    "0002-Fix-Findzstd-on-MINGW.patch"
+    "0002-Fix-Findzstd-on-MINGW.patch" \
+    "0004-disable-export-all-symbols-on-mingw32.patch"
 
   if (( ! _clangprefix )); then
     apply_patch_with_msg \

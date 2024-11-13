@@ -9,7 +9,7 @@ pkgver=1.13.3
 pkgrel=1
 pkgdesc='Build and publish crates with pyo3, rust-cpython and cffi bindings (mingw-w64)'
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 url='https://www.maturin.rs/'
 msys2_repository_url='https://github.com/pyo3/maturin'
 msys2_references=(
@@ -17,16 +17,20 @@ msys2_references=(
 )
 license=('spdx:MIT OR Apache-2.0')
 makedepends=(
+    "patch"
     "${MINGW_PACKAGE_PREFIX}-python-build"
     "${MINGW_PACKAGE_PREFIX}-python-installer"
     "${MINGW_PACKAGE_PREFIX}-python-setuptools-rust")
 options=('!strip')
-source=("https://pypi.org/packages/source/${_realname::1}/${_realname}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('771e1e9e71a278e56db01552e0d1acfd1464259f9575b6e72842f893cd299079')
+source=("https://pypi.org/packages/source/${_realname::1}/${_realname}/${_realname}-${pkgver}.tar.gz"
+        "001-fix-default-target-on-mingw-32bit.patch")
+sha256sums=('771e1e9e71a278e56db01552e0d1acfd1464259f9575b6e72842f893cd299079'
+            '5d363f2540f84651439f47782c9d60ababde58f7187b09945040f3795745bf45')
 
 prepare() {
   cp -r "${_realname}-${pkgver}" "python-build-${MSYSTEM}" && cd "python-build-${MSYSTEM}"
 
+  patch -Np1 -i "${srcdir}/001-fix-default-target-on-mingw-32bit.patch"
   cargo fetch --locked --target "${RUST_CHOST}"
 }
 

@@ -6,7 +6,7 @@
 
 _bootstrapping=yes
 _pgo=1
-if [[ ${MSYSTEM} != MINGW64 ]]; then
+if [[ ${MSYSTEM} != MINGW32 ]]; then
   _wasm=1
 fi
 
@@ -24,7 +24,7 @@ pkgver=1.95.0
 pkgrel=5
 pkgdesc="Systems programming language focused on safety, speed and concurrency (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 url="https://www.rust-lang.org/"
 msys2_repository_url="https://github.com/rust-lang/rust"
 msys2_references=(

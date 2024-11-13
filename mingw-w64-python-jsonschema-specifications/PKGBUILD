@@ -7,7 +7,7 @@ pkgver=2025.9.1
 pkgrel=3
 pkgdesc='The JSON Schema meta-schemas and vocabularies, exposed as a Registry (mingw-w64)'
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 msys2_references=(
   'archlinux: python-jsonschema-specifications'
   'gentoo: dev-python/jsonschema-specifications'

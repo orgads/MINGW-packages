@@ -7,7 +7,7 @@ pkgver=48.0.0
 pkgrel=1
 pkgdesc="A package designed to expose cryptographic recipes and primitives to Python developers (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 url='https://cryptography.io/'
 msys2_repository_url='https://github.com/pyca/cryptography'
 msys2_changelog_url='https://github.com/pyca/cryptography/blob/main/CHANGELOG.rst'
@@ -30,12 +30,6 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-python-build"
              "${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-cc"
              "${MINGW_PACKAGE_PREFIX}-pkgconf")
-checkdepends=(
-              #"${MINGW_PACKAGE_PREFIX}-python-iso8601"
-              "${MINGW_PACKAGE_PREFIX}-python-pretend"
-              #"${MINGW_PACKAGE_PREFIX}-python-cryptography-vectors"
-              "${MINGW_PACKAGE_PREFIX}-python-hypothesis"
-              "${MINGW_PACKAGE_PREFIX}-python-pytz")
 source=("https://pypi.org/packages/source/${_realname::1}/${_realname}/${_realname}-${pkgver}.tar.gz")
 sha256sums=('5c3932f4436d1cccb036cb0eaef46e6e2db91035166f1ad6505c3c9d5a635920')
 
@@ -44,12 +38,6 @@ build() {
 
   export _PYTHON_HOST_PLATFORM=$(python -c "import sysconfig, sys; sys.stdout.write(sysconfig.get_platform())")
   python -m build --wheel --skip-dependency-check --no-isolation
-}
-
-check() {
-  cd "${_realname}-${pkgver}"
-
-  # python -m pytest
 }
 
 package() {
