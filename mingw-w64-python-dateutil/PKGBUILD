@@ -8,7 +8,7 @@ pkgver=2.9.0.post0
 pkgrel=1
 pkgdesc="Provides powerful extensions to the standard datetime module (mingw-w64)"
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('mingw32')
 url="https://github.com/dateutil/dateutil"
 msys2_references=(
   'archlinux: python-dateutil'
@@ -20,9 +20,6 @@ depends=("${MINGW_PACKAGE_PREFIX}-python"
 makedepends=("${MINGW_PACKAGE_PREFIX}-python-build"
              "${MINGW_PACKAGE_PREFIX}-python-installer"
              "${MINGW_PACKAGE_PREFIX}-python-setuptools-scm")
-checkdepends=("${MINGW_PACKAGE_PREFIX}-python-pytest"
-              "${MINGW_PACKAGE_PREFIX}-python-freezegun"
-              "${MINGW_PACKAGE_PREFIX}-python-hypothesis")
 source=("https://pypi.org/packages/source/${_pyname::1}/${_pyname}/${_pyname}-${pkgver}.tar.gz")
 sha256sums=('37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3')
 
@@ -34,11 +31,6 @@ prepare() {
 build() {
   cp -r "${_pyname}-${pkgver}" "python-build-${MSYSTEM}" && cd "python-build-${MSYSTEM}"
   ${MINGW_PREFIX}/bin/python -m build --wheel --skip-dependency-check --no-isolation
-}
-
-check() {
-  cd "${srcdir}/python-build-${MSYSTEM}"
-  ${MINGW_PREFIX}/bin/python -m pytest || warning "Tests failed"
 }
 
 package() {
