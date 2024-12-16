@@ -1,0 +1,27 @@
+From db998a740f50780e6f792a7fee764371af6c9adf Mon Sep 17 00:00:00 2001
+From: Orgad Shaneh <orgad.shaneh@audiocodes.com>
+Date: Tue, 17 Dec 2024 20:59:59 +0200
+Subject: [PATCH 1/2] libsnmp: Support $HOME in MIBDIRS also on Windows
+
+---
+ snmplib/mib.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/snmplib/mib.c b/snmplib/mib.c
+index 95cde373e9..c9362ceed2 100644
+--- a/snmplib/mib.c
++++ b/snmplib/mib.c
+@@ -2629,6 +2629,10 @@ netsnmp_fixup_mib_directory(void)
+     char *new_mibpath;
+ 
+     DEBUGTRACE;
++#ifdef _WIN32
++    if (!homepath)
++      homepath = netsnmp_getenv("USERPROFILE");
++#endif
+     if (homepath && mibpath) {
+         DEBUGMSGTL(("fixup_mib_directory", "mib directories '%s'\n", mibpath));
+         while ((ptr_home = strstr(mibpath, "$HOME"))) {
+-- 
+2.47.0.windows.2.1.g5f1f7ee1fc
+
