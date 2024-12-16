@@ -1,0 +1,49 @@
+# Maintainer: Orgad Shaneh <orgad.shaneh@audiocodes.com>
+
+_realname=net-snmp
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=5.9.4
+pkgrel=2
+pkgdesc="A SNMP application library, tools and daemon (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64')
+url='http://www.net-snmp.org'
+license=('custom')
+depends=("${MINGW_PACKAGE_PREFIX}-openssl")
+makedepends=("${MINGW_PACKAGE_PREFIX}-autotools"
+             "${MINGW_PACKAGE_PREFIX}-cc")
+source=("https://github.com/${_realname}/${_realname}/archive/refs/tags/v${pkgver}.tar.gz"
+        0001-libsnmp-Support-HOME-in-MIBDIRS-also-on-Windows.patch
+        0002-configure-Fix-default-paths-on-mingw32-build.patch)
+sha256sums=('0699e7effc5782124c1fa2f2823d816ae740fac5bef002440edfee86b17c1aba'
+            'b7c5862a356e2e731ccbd21859b0b9f777000cee6c2ddd2272a18e7738fca679'
+            'f22cab82afa9eb9bd4a3f20299b9366f8803b63ee244328e252bfbca2a106cec')
+
+prepare() {
+  cd ${srcdir}/${_realname}-${pkgver}
+  patch -p1 -i ${srcdir}/0001-libsnmp-Support-HOME-in-MIBDIRS-also-on-Windows.patch
+  patch -p1 -i ${srcdir}/0002-configure-Fix-default-paths-on-mingw32-build.patch
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+  cp -R "${_realname}-${pkgver}" "${srcdir}"/build-${CARCH}
+  cd "${srcdir}"/build-${CARCH}
+
+  ./configure \
+    --prefix="$(cygpath ${MINGW_PREFIX})" \
+    --build=${MINGW_CHOST} \
+    --host=${MINGW_CHOST} \
+    --target=${MINGW_CHOST} \
+    --disable-embedded-perl \
+    --without-perl-modules \
+    --with-defaults
+
+  make -j $(nproc)
+}
+
+package() {
+  cd "${srcdir}"/build-${CARCH}
+  make -j $(nproc) install DESTDIR="${pkgdir}"
+}

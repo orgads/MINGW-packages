@@ -1,0 +1,119 @@
+From ed234ffef1107942e05a2642908fc3afc16caab6 Mon Sep 17 00:00:00 2001
+From: Orgad Shaneh <orgad.shaneh@audiocodes.com>
+Date: Tue, 17 Dec 2024 20:58:31 +0200
+Subject: [PATCH 2/2] configure: Fix default paths on mingw32 build
+
+The default prefix is typically /mingw32 or /mingw64, which cannot be
+converted in runtime. Do the conversion in configure.
+
+For example, this change fixes this:
+  #define NETSNMP_DEFAULT_MIBDIRS "$HOME/.snmp/mibs;/mingw32/share/snmp/mibs"
+
+to be:
+  #define NETSNMP_DEFAULT_MIBDIRS "$HOME/.snmp/mibs;C:/msys64/mingw32/share/snmp/mibs"
+---
+ configure                        | 14 ++++++++++++--
+ configure.d/config_project_paths | 14 ++++++++++++--
+ 2 files changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/configure b/configure
+index fe9bb0b0e3..4ba62643ae 100755
+--- a/configure
++++ b/configure
+@@ -17776,6 +17776,9 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
+     SNMPLIBPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPLIBPATH="$(cygpath --mixed "$SNMPLIBPATH")"
++fi
+ printf "%s\n" "#define SNMPLIBPATH \"$SNMPLIBPATH\"" >>confdefs.h
+ 
+ 
+@@ -17790,6 +17793,9 @@ while test "x$tmpset" != "x$SNMPSHAREPATH"; do
+     SNMPSHAREPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPSHAREPATH="$(cygpath --mixed "$SNMPSHAREPATH")"
++fi
+ printf "%s\n" "#define SNMPSHAREPATH \"$SNMPSHAREPATH\"" >>confdefs.h
+ 
+ 
+@@ -17797,12 +17803,13 @@ printf "%s\n" "#define SNMPSHAREPATH \"$SNMPSHAREPATH\"" >>confdefs.h
+ #       MIBDIRS   (default)
+ #
+ if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
+-    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
++    PATH_SEP=":"
+     if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+         #
+         #    USe Windows-style path separator
+-        NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
++        PATH_SEP=";"
+     fi
++    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs${PATH_SEP}$SNMPSHAREPATH/mibs"
+     printf "%s\n" "#define NETSNMP_DEFAULT_MIBDIRS \"$NETSNMP_DEFAULT_MIBDIRS\"" >>confdefs.h
+ 
+ fi
+@@ -17816,6 +17823,9 @@ while test "x$tmpset" != "x$SNMPCONFPATH"; do
+     SNMPCONFPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPCONFPATH="$(cygpath --mixed "$SNMPCONFPATH")"
++fi
+ printf "%s\n" "#define SNMPCONFPATH \"$SNMPCONFPATH\"" >>confdefs.h
+ 
+ 
+diff --git a/configure.d/config_project_paths b/configure.d/config_project_paths
+index da480a796d..e2aa21034f 100644
+--- a/configure.d/config_project_paths
++++ b/configure.d/config_project_paths
+@@ -61,6 +61,9 @@ while test "x$tmpset" != "x$SNMPLIBPATH"; do
+     SNMPLIBPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPLIBPATH="$(cygpath --mixed "$SNMPLIBPATH")"
++fi
+ AC_DEFINE_UNQUOTED(SNMPLIBPATH,"$SNMPLIBPATH")
+ AC_SUBST(SNMPLIBPATH)
+ AC_DEFINE_UNQUOTED(SNMPDLMODPATH,"$SNMPLIBPATH/dlmod")
+@@ -73,18 +76,22 @@ while test "x$tmpset" != "x$SNMPSHAREPATH"; do
+     SNMPSHAREPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPSHAREPATH="$(cygpath --mixed "$SNMPSHAREPATH")"
++fi
+ AC_DEFINE_UNQUOTED(SNMPSHAREPATH,"$SNMPSHAREPATH")
+ AC_SUBST(SNMPSHAREPATH)
+ 
+ #       MIBDIRS   (default)
+ #
+ if test "x$NETSNMP_DEFAULT_MIBDIRS" = "x"; then
+-    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs:$SNMPSHAREPATH/mibs"
++    PATH_SEP=":"
+     if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
+         #
+         #    USe Windows-style path separator
+-        NETSNMP_DEFAULT_MIBDIRS=`echo "$NETSNMP_DEFAULT_MIBDIRS" | $SED 's/:/;/g'`
++        PATH_SEP=";"
+     fi
++    NETSNMP_DEFAULT_MIBDIRS="\$HOME/.snmp/mibs${PATH_SEP}$SNMPSHAREPATH/mibs"
+     AC_DEFINE_UNQUOTED(NETSNMP_DEFAULT_MIBDIRS,"$NETSNMP_DEFAULT_MIBDIRS")
+ fi
+ AC_SUBST(NETSNMP_DEFAULT_MIBDIRS)
+@@ -97,5 +104,8 @@ while test "x$tmpset" != "x$SNMPCONFPATH"; do
+     SNMPCONFPATH="$tmpset"
+     eval tmpset="$tmpset"
+ done
++if test "x$PARTIALTARGETOS" = "xmingw32" -o "x$PARTIALTARGETOS" = "xmingw32msvc"; then
++    SNMPCONFPATH="$(cygpath --mixed "$SNMPCONFPATH")"
++fi
+ AC_DEFINE_UNQUOTED(SNMPCONFPATH,"$SNMPCONFPATH")
+ AC_SUBST(SNMPCONFPATH)
+-- 
+2.47.0.windows.2.1.g5f1f7ee1fc
+
